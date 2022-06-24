@@ -78,6 +78,25 @@ server.post('/participants', async (req , res) => {
 });
 
 
+server.get('/participants' , async (req, res) => {
+
+    await connectDB();
+
+    try {
+        
+        const participantsList = await db.collection('participants').find().toArray();
+        res.send(participantsList);
+        mongoClient.close();
+
+    } catch (error) {
+        
+        res.sendStatus(500);
+        mongoClient.close();
+    }
+
+});
+
+
 
 
 
