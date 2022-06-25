@@ -187,6 +187,48 @@ server.get('/messages' , async (req, res) => {
 });
 
 
+
+
+server.post('/status' , async (req , res) => {
+
+    await connectDB();
+
+    const user = req.headers.user;
+
+    try {
+
+        const participantsList = await db.collection('participants').find().toArray();
+
+        const found = participantsList.find(element => element.name === user);
+
+        if (!found) {
+            res.sendStatus(404);
+            mongoClient.close();
+            return;
+        }
+
+        await db.collection('participants').updateOne({ 
+			name: user
+		}, { $set: 
+            {
+                lastStatus: Date.now()
+            } 
+        });
+
+        res.sendStatus(200);
+
+    } catch(error) {
+
+        res.sendStatus(500);
+        mongoClient.close();
+    }
+
+
+
+});
+
+
+
 server.listen(5000, () => {
     console.log('Server is litening on port 5000.');
 });
