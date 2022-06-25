@@ -14,6 +14,9 @@ server.use(cors());
 
 const mongoClient = new MongoClient(process.env.MONGO_URI);
 let db;
+mongoClient.connect(() => {
+    db = mongoClient.db('projeto12BatePapoUol');
+});
 
 async function connectDB () {
     try {
@@ -22,6 +25,7 @@ async function connectDB () {
         db = mongoClient.db('projeto12BatePapoUol');
 
     } catch (error) {
+        console.log('deu erro na conexão com o mongo');
         console.log(error);
     }
 };
@@ -35,7 +39,7 @@ const participantNameSchema = joi.object({
 
 server.post('/participants', async (req , res) => {
 
-    await connectDB();
+    //await connectDB();
 
     try {
 
@@ -44,7 +48,7 @@ server.post('/participants', async (req , res) => {
 
         if (validation.error) {
             res.sendStatus(422);
-            mongoClient.close();
+            //mongoClient.close();
             return;
         }
 
@@ -54,7 +58,7 @@ server.post('/participants', async (req , res) => {
 
         if (found) {
             res.sendStatus(409);
-            mongoClient.close();
+            //mongoClient.close();
             return;
         }
 
@@ -68,11 +72,11 @@ server.post('/participants', async (req , res) => {
         await db.collection('messages').insertOne(loginMsg);
         
         res.sendStatus(201);
-        mongoClient.close();
+        //mongoClient.close();
 
     } catch (error) {
         res.sendStatus(500);
-        mongoClient.close();
+        //mongoClient.close();
     }
 
 });
@@ -80,18 +84,18 @@ server.post('/participants', async (req , res) => {
 
 server.get('/participants' , async (req, res) => {
 
-    await connectDB();
+    //await connectDB();
 
     try {
         
         const participantsList = await db.collection('participants').find().toArray();
         res.send(participantsList);
-        mongoClient.close();
+        //mongoClient.close();
 
     } catch (error) {
         
         res.sendStatus(500);
-        mongoClient.close();
+        //mongoClient.close();
     }
 
 });
@@ -104,7 +108,7 @@ server.get('/participants' , async (req, res) => {
 
 server.post('/messages', async (req , res) => {
 
-    await connectDB();
+    //await connectDB();
 
     try {
 
@@ -128,7 +132,7 @@ server.post('/messages', async (req , res) => {
 
         if (validation.error) {
             res.sendStatus(422);
-            mongoClient.close();
+            //mongoClient.close();
             return;
         }
 
@@ -139,11 +143,11 @@ server.post('/messages', async (req , res) => {
         await db.collection('messages').insertOne(newMessage);
         
         res.sendStatus(201);
-        mongoClient.close();
+        //mongoClient.close();
 
     } catch (error) {
         res.sendStatus(500);
-        mongoClient.close();
+        //mongoClient.close();
     }
 
 });
@@ -151,7 +155,7 @@ server.post('/messages', async (req , res) => {
 
 server.get('/messages' , async (req, res) => {
 
-    await connectDB();
+    //await connectDB();
 
 
     try {
@@ -176,12 +180,12 @@ server.get('/messages' , async (req, res) => {
         }
 
         res.send(newMessagesList);
-        mongoClient.close();
+        //mongoClient.close();
 
     } catch (error) {
         
         res.sendStatus(500);
-        mongoClient.close();
+        //mongoClient.close();
     }
 
 });
@@ -191,7 +195,7 @@ server.get('/messages' , async (req, res) => {
 
 server.post('/status' , async (req , res) => {
 
-    await connectDB();
+    //await connectDB();
 
     const user = req.headers.user;
 
@@ -203,7 +207,7 @@ server.post('/status' , async (req , res) => {
 
         if (!found) {
             res.sendStatus(404);
-            mongoClient.close();
+            //mongoClient.close();
             return;
         }
 
@@ -216,11 +220,13 @@ server.post('/status' , async (req , res) => {
         });
 
         res.sendStatus(200);
+        //mongoClient.close();
 
     } catch(error) {
-
+        console.log('deu erro');
+        console.log(error);
         res.sendStatus(500);
-        mongoClient.close();
+        //mongoClient.close();
     }
 
 
