@@ -30,6 +30,36 @@ async function connectDB () {
     }
 };
 
+const TIME_15S = 15000;
+const TIME_10S = 10000;
+
+setInterval(verifyLastStatus, TIME_15S);
+
+async function verifyLastStatus () {
+
+    try {
+
+        const participantsList = await db.collection('participants').find().toArray();
+
+        for (let i = 0 ; i < participantsList.length ; i++) {
+
+            if (Date.now() - participantsList[i].lastStatus > TIME_10S) {
+            
+                await db.collection('participants').deleteOne({ name: participantsList[i].name });
+
+                const time = dayjs(Date.now()).format('HH:mm:ss');
+                const logoutMsg = {from: participantsList[i].name, to: 'Todos', text: 'sai da sala...', type: 'status', time: time};
+
+                await db.collection('messages').insertOne(logoutMsg);
+            }
+        }
+
+    } catch(error) {
+        res.sendStatus(500);
+    }
+
+}
+
 
 const participantNameSchema = joi.object({
     name: joi.string().required(),
