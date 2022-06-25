@@ -126,8 +126,6 @@ server.post('/messages', async (req , res) => {
 
         const validation = messageSchema.validate(message, { abortEarly: true });
 
-        console.log(validation.error);
-
         if (validation.error) {
             res.sendStatus(422);
             mongoClient.close();
@@ -151,7 +149,42 @@ server.post('/messages', async (req , res) => {
 });
 
 
+server.get('/messages' , async (req, res) => {
 
+    await connectDB();
+
+
+    try {
+        
+        const user = req.headers.user;
+
+        const limit = parseInt(req.query.limit);
+
+        const messagesList = await db.collection('messages').find().toArray();
+
+        let newMessagesList = [];
+
+        for (let i = 0 ; i < messagesList.length ; i++) {
+            
+            if(messagesList[i].to === 'Todos' || (messagesList[i].type === 'private_message' && (messagesList[i].to === user || messagesList[i].from === user)) || messagesList[i].type === 'message') {
+                newMessagesList.push(messagesList[i]);
+            }
+        }
+
+        if (limit) {
+            newMessagesList = newMessagesList.slice(-limit);
+        }
+
+        res.send(newMessagesList);
+        mongoClient.close();
+
+    } catch (error) {
+        
+        res.sendStatus(500);
+        mongoClient.close();
+    }
+
+});
 
 
 server.listen(5000, () => {
